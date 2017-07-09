@@ -1,15 +1,17 @@
 const socket = io();
 
+const formMessage = document.getElementById('message-form');
+const messages = document.getElementById('messages');
+const locationButton = document.getElementById('send-location');
+
 socket.on('connect', () => {
     console.log('Connected to server');
-
 });
 
 socket.on('disconnect', () => {
     console.log('Disconnected from server');
 });
 
-const messages = document.getElementById('messages');
 socket.on('newMessage', message => {
     let formattedTime = moment(message.createdAt).format('h:mm a');
     const template = document.getElementById('message-template').innerHTML;
@@ -20,6 +22,7 @@ socket.on('newMessage', message => {
     });
 
     messages.appendChild( str2DOMElement(html) );
+    scrollToBottom();
 });
 
 socket.on('newLocationMessage', message => {
@@ -32,14 +35,13 @@ socket.on('newLocationMessage', message => {
     });
 
     messages.appendChild( str2DOMElement(html) );
+    scrollToBottom();
 });
 
-const formMessage = document.getElementById('message-form');
 formMessage.addEventListener('submit', e => {
     e.preventDefault();
 
     const messageTextBox = formMessage.querySelector('[name=message]');
-
     socket.emit('createMessage', {
         from: 'User',
         text: messageTextBox.value
@@ -48,7 +50,6 @@ formMessage.addEventListener('submit', e => {
     });
 });
 
-const locationButton = document.getElementById('send-location');
 locationButton.addEventListener('click', () => {
     if (!navigator.geolocation) {
         return alert('Geolocation not supported by your browser');
@@ -70,6 +71,19 @@ locationButton.addEventListener('click', () => {
         alert('Unable to fetch location.')
     })
 });
+
+function scrollToBottom() {
+    const newMessage = messages.lastElementChild;
+
+    const clientHeight = messages.clientHeight;
+    const scrollTop = messages.scrollTop;
+    const scrollHeight = messages.scrollHeight;
+    const newMessageHeight = newMessage.offsetHeight;
+
+    if (clientHeight + scrollTop + newMessageHeight >= scrollHeight) {
+        messages.scrollTop = scrollHeight;
+    }
+}
 
 function str2DOMElement (html) {
     const frame = document.createElement('iframe');
