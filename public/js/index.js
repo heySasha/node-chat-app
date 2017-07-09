@@ -11,11 +11,11 @@ socket.on('disconnect', () => {
 
 const messages = document.getElementById('messages');
 socket.on('newMessage', message => {
-   console.log('new message', message);
+   let formattedTime = moment(message.createdAt).format('h:mm a');
 
    const li = document.createElement('li');
-   li.textContent = `${message.from}: ${message.text}`;
-    messages.appendChild(li);
+   li.textContent = `${message.from} ${formattedTime}: ${message.text}`;
+   messages.appendChild(li);
 });
 
 socket.on('newLocationMessage', message => {
@@ -24,7 +24,9 @@ socket.on('newLocationMessage', message => {
     a.textContent = 'My current location';
     a.target = '_blank';
 
-    li.textContent = `${message.from}: `;
+    let formattedTime = moment(message.createdAt).format('h:mm a');
+
+    li.textContent = `${message.from} ${formattedTime}: `;
     a.href = message.url;
     li.appendChild(a);
     messages.appendChild(li);
