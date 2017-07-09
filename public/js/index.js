@@ -11,25 +11,27 @@ socket.on('disconnect', () => {
 
 const messages = document.getElementById('messages');
 socket.on('newMessage', message => {
-   let formattedTime = moment(message.createdAt).format('h:mm a');
+    let formattedTime = moment(message.createdAt).format('h:mm a');
+    const template = document.getElementById('message-template').innerHTML;
+    const html = Mustache.render(template, {
+        text: message.text,
+        from: message.from,
+        createdAt: formattedTime
+    });
 
-   const li = document.createElement('li');
-   li.textContent = `${message.from} ${formattedTime}: ${message.text}`;
-   messages.appendChild(li);
+    messages.appendChild( str2DOMElement(html) );
 });
 
 socket.on('newLocationMessage', message => {
-    const li = document.createElement('li');
-    const a = document.createElement('a');
-    a.textContent = 'My current location';
-    a.target = '_blank';
-
     let formattedTime = moment(message.createdAt).format('h:mm a');
+    const template = document.getElementById('location-message-template').innerHTML;
+    const html = Mustache.render(template, {
+        from: message.from,
+        url: message.url,
+        createdAt: formattedTime
+    });
 
-    li.textContent = `${message.from} ${formattedTime}: `;
-    a.href = message.url;
-    li.appendChild(a);
-    messages.appendChild(li);
+    messages.appendChild( str2DOMElement(html) );
 });
 
 const formMessage = document.getElementById('message-form');
@@ -69,5 +71,14 @@ locationButton.addEventListener('click', () => {
     })
 });
 
-
-
+function str2DOMElement (html) {
+    const frame = document.createElement('iframe');
+    frame.style.display = 'none';
+    document.body.appendChild(frame);
+    frame.contentDocument.open();
+    frame.contentDocument.write(html);
+    frame.contentDocument.close();
+    const el = frame.contentDocument.body.firstChild;
+    document.body.removeChild(frame);
+    return el;
+}
