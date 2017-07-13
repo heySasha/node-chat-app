@@ -6,6 +6,29 @@ const locationButton = document.getElementById('send-location');
 
 socket.on('connect', () => {
     console.log('Connected to server');
+    const params = Utils.deparam();
+
+    socket.emit('join', params, err => {
+        if (err) {
+            alert(err);
+            window.location.href = '/';
+        } else {
+            console.log('No error');
+        }
+    });
+});
+
+socket.on('updateUserList', users => {
+    const ol =  document.createElement('ol');
+
+    users.forEach(user => {
+        let li = document.createElement('li');
+        li.textContent = user;
+
+        ol.appendChild(li)
+    });
+
+    document.getElementById('users').innerHTML = ol.outerHTML;
 });
 
 socket.on('disconnect', () => {
@@ -21,7 +44,7 @@ socket.on('newMessage', message => {
         createdAt: formattedTime
     });
 
-    messages.appendChild( str2DOMElement(html) );
+    messages.appendChild( Utils.str2DOMElement(html) );
     scrollToBottom();
 });
 
@@ -34,7 +57,7 @@ socket.on('newLocationMessage', message => {
         createdAt: formattedTime
     });
 
-    messages.appendChild( str2DOMElement(html) );
+    messages.appendChild( Utils.str2DOMElement(html) );
     scrollToBottom();
 });
 
@@ -83,16 +106,4 @@ function scrollToBottom() {
     if (clientHeight + scrollTop + newMessageHeight >= scrollHeight) {
         messages.scrollTop = scrollHeight;
     }
-}
-
-function str2DOMElement (html) {
-    const frame = document.createElement('iframe');
-    frame.style.display = 'none';
-    document.body.appendChild(frame);
-    frame.contentDocument.open();
-    frame.contentDocument.write(html);
-    frame.contentDocument.close();
-    const el = frame.contentDocument.body.firstChild;
-    document.body.removeChild(frame);
-    return el;
 }
