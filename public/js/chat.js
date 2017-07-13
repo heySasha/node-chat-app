@@ -39,8 +39,8 @@ socket.on('newMessage', message => {
     let formattedTime = moment(message.createdAt).format('h:mm a');
     const template = document.getElementById('message-template').innerHTML;
     const html = Mustache.render(template, {
-        text: message.text,
         from: message.from,
+        text: message.text,
         createdAt: formattedTime
     });
 
@@ -66,7 +66,6 @@ formMessage.addEventListener('submit', e => {
 
     const messageTextBox = formMessage.querySelector('[name=message]');
     socket.emit('createMessage', {
-        from: 'User',
         text: messageTextBox.value
     }, () => {
         messageTextBox.value = '';
